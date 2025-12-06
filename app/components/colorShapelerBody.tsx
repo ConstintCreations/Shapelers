@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-export default function ColorShapelerBody({ color, type, baby=false }: { color: string, type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean }) {
+export default function ColorShapelerBody({ color, type, baby=false, editing=false }: { color: string, type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, editing?:boolean }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-export default function ShapelerEyebrows({ eyebrow="Normal", type, baby=false }: { eyebrow?: "Normal" | "Confused" | "Excited" | "Excited-Surround" | "Mad" | "Scared-Under-Round" | "Worried", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean }) {
+export default function ShapelerEyebrows({ eyebrow="Normal", type, baby=false, editing=false }: { eyebrow?: "Normal" | "Confused" | "Excited" | "Excited-Surround" | "Mad" | "Scared-Under-Round" | "Worried", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, editing?:boolean }) {
 
     const offsets = {
         "Bloopler": { eyes: { x:40, y:48 }, brow: { y: 144}},

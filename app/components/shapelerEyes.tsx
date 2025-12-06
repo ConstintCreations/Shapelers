@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function ShapelerEyes({ pupil="Normal", type, baby=false, male=true, blinkDurationCenter=200, blinkDurationSpread=100, blinkDelayCenter=5000, blinkDelaySpread=1000 }: { pupil?: "Normal" | "Blink" | "Crazy" | "Dizzy" | "Excited" | "Small", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, male?:boolean, blinkDurationCenter?:number, blinkDurationSpread?:number, blinkDelayCenter?:number, blinkDelaySpread?:number }) {
+export default function ShapelerEyes({ pupil="Normal", type, baby=false, male=true, blinkDurationCenter=200, blinkDurationSpread=100, blinkDelayCenter=5000, blinkDelaySpread=1000, editing=false }: { pupil?: "Normal" | "Blink" | "Crazy" | "Dizzy" | "Excited" | "Small", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, male?:boolean, blinkDurationCenter?:number, blinkDurationSpread?:number, blinkDelayCenter?:number, blinkDelaySpread?:number, editing?:boolean }) {
 
     const offsets = {
         "Bloopler": { eyes: { x:40, y:48 }, pupils: { x:80, y:48 } },
@@ -39,8 +39,7 @@ export default function ShapelerEyes({ pupil="Normal", type, baby=false, male=tr
             setMousePercent({ x: Math.min(100, Math.max(1, x)), y: Math.min(100, Math.max(1, y)) });
         };
 
-        const handleDown = () => setMouseDown(true);
-        const handleUp = () => setMouseDown(false);
+        
 
         let timeout: number;
         const scheduleBlink = () => {
@@ -57,6 +56,9 @@ export default function ShapelerEyes({ pupil="Normal", type, baby=false, male=tr
         }
 
         scheduleBlink();
+        
+        const handleDown = () => setMouseDown(true);
+        const handleUp = () => setMouseDown(false);
 
         window.addEventListener("mousedown", handleDown);
         window.addEventListener("mouseup", handleUp);
@@ -92,8 +94,8 @@ export default function ShapelerEyes({ pupil="Normal", type, baby=false, male=tr
                 <img className="relative" style={{bottom: selectedOffsets.eyes.y, right: selectedOffsets.eyes.x}} src={baby ? `/Parts/Shapelet/Eyes/Shapelet-Eye-${male ? "Male" : "Female" }.png` : `/Parts/Shapeler/Eyes/Eye-${male ? "Male" : "Female" }.png` } />
                 <img className="relative -scale-x-100" style={{bottom: selectedOffsets.eyes.y, left: selectedOffsets.eyes.x}} src={baby ? `/Parts/Shapelet/Eyes/Shapelet-Eye-${male ? "Male" : "Female" }.png` : `/Parts/Shapeler/Eyes/Eye-${male ? "Male" : "Female" }.png` } />
             </div>
-            <img className="relative" style={{bottom: selectedOffsets.pupils.y + pupilLookOffset.y, right: selectedOffsets.pupils.x + pupilLookOffset.x}} src={baby ? `/Parts/Shapelet/Eyes/Pupils/Shapelet-Pupil-${mouseDown || isBlinking ? "Blink" : pupil}.png` : `/Parts/Shapeler/Eyes/Pupils/Pupil-${mouseDown || isBlinking ? "Blink" : pupil}.png` } />
-            <img className="relative -scale-x-100" style={{bottom: selectedOffsets.pupils.y + pupilLookOffset.y, left: selectedOffsets.pupils.x -pupilLookOffset.x}} src={baby ? `/Parts/Shapelet/Eyes/Pupils/Shapelet-Pupil-${mouseDown || isBlinking ? "Blink" : pupil}.png` : `/Parts/Shapeler/Eyes/Pupils/Pupil-${mouseDown || isBlinking ? "Blink" : pupil}.png` } />
+            <img className="relative" style={{bottom: selectedOffsets.pupils.y + (editing ? pupilLookOffset.y : 0), right: selectedOffsets.pupils.x + (editing ? pupilLookOffset.x : 0)}} src={baby ? `/Parts/Shapelet/Eyes/Pupils/Shapelet-Pupil-${(editing && mouseDown) || isBlinking ? "Blink" : (pupil == "Normal" || pupil == "Blink" ? pupil : "Normal")}.png` : `/Parts/Shapeler/Eyes/Pupils/Pupil-${(editing && mouseDown) || isBlinking ? "Blink" : pupil}.png` } />
+            <img className="relative -scale-x-100" style={{bottom: selectedOffsets.pupils.y + (editing ? pupilLookOffset.y : 0), left: selectedOffsets.pupils.x - (editing ? pupilLookOffset.x : 0)}} src={baby ? `/Parts/Shapelet/Eyes/Pupils/Shapelet-Pupil-${(editing && mouseDown) || isBlinking ? "Blink" : (pupil == "Normal" || pupil == "Blink" ? pupil : "Normal")}.png` : `/Parts/Shapeler/Eyes/Pupils/Pupil-${(editing && mouseDown) || isBlinking ? "Blink" : pupil}.png` } />
         </div>
     )
 }

@@ -1,4 +1,4 @@
-export default function ShapelerMouth({ mouth="Normal", type, baby=false }: { mouth?: "Normal" | "Happy" | "Mad" | "Sad" | "Shocked" | "Big-Wave" | "Small-Wave" | "Wide", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean }) {
+export default function ShapelerMouth({ mouth="Normal", type, baby=false, editing=false }: { mouth?: "Normal" | "Happy" | "Mad" | "Sad" | "Shocked" | "Big-Wave" | "Small-Wave" | "Wide", type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, editing?:boolean }) {
     
     const offsets = {
         "Bloopler": 50,
@@ -18,7 +18,7 @@ export default function ShapelerMouth({ mouth="Normal", type, baby=false }: { mo
     
     return (
         <div className="absolute flex flex-row justify-center items-center w-full h-full">
-            <img className="relative" style={{top: selectedOffsets}} src={baby ? `/Parts/Shapelet/Mouths/Shapelet-Mouth-${mouth}.png` : `/Parts/Shapeler/Mouths/Mouth-${mouth}.png`} />
+            <img className="relative" style={{top: selectedOffsets}} src={baby ? `/Parts/Shapelet/Mouths/Shapelet-Mouth-${mouth == "Normal" || mouth == "Wide" ? mouth : "Normal" }.png` : `/Parts/Shapeler/Mouths/Mouth-${mouth}.png`} />
         </div>
     )
 }
