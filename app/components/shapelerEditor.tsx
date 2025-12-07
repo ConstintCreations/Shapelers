@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import html2canvas from "html2canvas";
+import { useEffect, useState, useRef } from "react";
 import Shapeler from "./shapeler";
 import ColorSwatch from "./colorSwatch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +12,7 @@ import { faImages } from "@fortawesome/free-solid-svg-icons";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 type PupilTypes = "Normal" | "Blink" | "Crazy" | "Dizzy" | "Excited" | "Small";
 type MouthTypes = "Normal" | "Happy" | "Mad" | "Sad" | "Shocked" | "Big-Wave" | "Small-Wave" | "Wide";
@@ -44,6 +46,7 @@ const DEFAULT_SHAPELER: ShapelerType = {
 export default function ShapelerEditor() {
 
     const [loaded, setLoaded] = useState(false);
+    const shapelerRef = useRef<HTMLDivElement>(null);
 
     const [shapeler, setShapeler] = useState<ShapelerType>({
         color: "#f36c60ff",
@@ -57,6 +60,7 @@ export default function ShapelerEditor() {
         name: ""
     });
 
+    const [savedGallery, setSavedGallery] = useState<{name:string, url:string}[]>([]);
     const [savedShapelers, setSavedShapelers] = useState<ShapelerType[] | null>(null);
     const [shapelerIndex, setShapelerIndex] = useState(0);
     const [showGallery, setShowGallery] = useState(false);
@@ -78,7 +82,18 @@ export default function ShapelerEditor() {
         } else {
             setSavedShapelers([DEFAULT_SHAPELER]);
         }
+        const localStorageGallery = localStorage.getItem("shapelerGallery");
+        if (localStorageGallery) {
+            const parsedGallery = JSON.parse(localStorageGallery);
+            setSavedGallery(parsedGallery);
+        } else {
+            setSavedGallery([]);
+        }
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem("shapelerGallery", JSON.stringify(savedGallery));
+    }, [savedGallery])
 
     function saveShapeler() {
         
@@ -135,24 +150,100 @@ export default function ShapelerEditor() {
         setLoaded(true);
     }, [shapelerIndex, savedShapelers]);
 
+    const [countdown, setCountdown] = useState(3);
+    const countdownRef = useRef<NodeJS.Timeout | null>(null);
+
+    const hasSavedPhotoRef = useRef(false);
+
+    const takePhoto = async () => {
+        if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+            setShowPhotoCountdown(false);
+            setCountdown(3);
+            hasSavedPhotoRef.current = false;
+            return;
+        };
+        if (!shapelerRef.current) return;
+
+        setShowPhotoCountdown(true);
+        setCountdown(3);
+        hasSavedPhotoRef.current = false;
+
+        countdownRef.current = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(countdownRef.current!);
+                    countdownRef.current = null;
+                    setShowPhotoCountdown(false);
+
+                    if (!hasSavedPhotoRef.current && shapelerRef.current) {
+                        hasSavedPhotoRef.current = true;
+                        html2canvas(shapelerRef.current, { backgroundColor: null }).then((canvas) => {
+                            const ctx = canvas.getContext("2d");
+                            const cropWidth = shapeler.baby ? 256 : 512;
+                            const cropHeight = shapeler.baby ? 192 : 384;
+                            const startX = (canvas.width - cropWidth) / 2;
+                            const startY = (canvas.height - cropHeight) / 2;
+                            const croppedCanvas = document.createElement("canvas");
+                            croppedCanvas.width = cropWidth;
+                            croppedCanvas.height = cropHeight;
+                            const croppedCtx = croppedCanvas.getContext("2d");
+                            if (!ctx || !croppedCtx) return;
+                            croppedCtx.drawImage(canvas, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+                            const dataUrl = croppedCanvas.toDataURL("image/png");
+                            
+                            setSavedGallery(s => {
+                                const newGallery = [...s, {name: shapeler.name || (shapeler.baby ? shapeler.type.slice(0, -1) + "t" : shapeler.type), url: dataUrl}];
+                                localStorage.setItem("shapelerGallery", JSON.stringify(newGallery));
+                                return newGallery;
+                            });
+                        });
+                    }
+
+                    return 3;
+                } else {
+                    return prev - 1;
+                }
+            });
+        }, 1000);
+    }
+
     return (
         <div className = "absolute top-0 left-0 w-full h-full min-h-220">
             <img src="/UI/ShapelerMaker.png" className="h-30 absolute top-5 left-5" />
-            <div className="fixed right-5 top-5 flex flex-row gap-8 bg-[#d7bd8d] px-5 py-4 rounded-2xl border-5 border-[#b3855e] text-[#5b4636] font-bold z-20">
+            { loaded && <div className="fixed right-5 top-5 flex flex-row gap-8 bg-[#d7bd8d] px-5 py-4 rounded-2xl border-5 border-[#b3855e] text-[#5b4636] font-bold z-20">
                 <button onClick={() => {if (!showPhotoCountdown) setShowGallery(!showGallery)}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
                     <FontAwesomeIcon icon={faImages} className="scale-200 text-[#5b4636]"/>
                 </button>
-                <button onClick={() => {setShowGallery(false); setShowPhotoCountdown(!showPhotoCountdown)}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
+                <button onClick={() => {setShowGallery(false); takePhoto()}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
                     <FontAwesomeIcon icon={faCamera} className="scale-200 text-[#5b4636]"/>
                 </button>
-            </div>
+            </div>}
             
             { showGallery &&
             <div className="absolute flex w-full h-full items-center justify-center z-15">
                 <FontAwesomeIcon icon={faClose} onClick={() => setShowGallery(false)} className="scale-200 absolute top-11/64 right-5/32 text-[#5b4636] z-30 cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none"/>
                 <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50" />
                 <div className="w-3/4 h-3/4 min-w-100 min-h-100 bg-[#d7bd8d] rounded-2xl border-10 border-[#b3855e] text-[#5b4636] rounded-3xl p-5 z-10 overflow-auto flex flex-row flex-wrap gap-5 justify-center items-center text-center">
-                    Nothing to see here... <br /> Try taking some pictures!
+                    { savedGallery && savedGallery.length > 0 ? savedGallery.map((data, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                            <img src={data.url} className="max-w-64 max-h-48 rounded-2xl border-5 border-[#b3855e]" />
+                            <div className="mt-2 flex flex-row gap-4 w-full justify-between px-5 items-center border-5 border-[#b3855e] rounded-2xl bg-[#d7bd8d] py-2">
+                                <FontAwesomeIcon icon={faTrash} onClick={() => {
+                                    setSavedGallery(s => {
+                                        const newGallery = s.filter((_, i) => i !== index);
+                                        localStorage.setItem("shapelerGallery", JSON.stringify(newGallery));
+                                        return newGallery;
+                                    });
+                                }} className="cursor-pointer text-red-400 transition-transform ease-in-out duration-300 hover:-translate-y-1"/>
+                                <a href={data.url} download={`${data.name}.png`} className="cursor-pointer text-[#5b4636] font-bold hover:underline">
+                                    <FontAwesomeIcon icon={faDownload} className="mr-2"/>Download
+                                </a>
+                            </div>
+                            
+                        </div>
+                    )) : <div>Nothing to see here... <br /> Try taking some pictures!</div> }
                 </div>
             </div>
             }
@@ -160,19 +251,19 @@ export default function ShapelerEditor() {
             { showPhotoCountdown &&
             <div className="absolute flex w-full h-full items-center justify-center z-15">
                 <div className="fixed top-0 left-0 w-full h-full bg-black opacity-20" />
-                <div className="text-white text-9xl opacity-50 scale-200"></div>
+                <div className="text-white text-9xl opacity-50 scale-200">{countdown}</div>
             </div>
             }
             
             <button onClick={() => {localStorage.clear(); location.reload()}} className="fixed z-10 bottom-2 right-5 text-[#5b4636] font-bold cursor-pointer hover:bg-[#d7bd8d] px-3 py-1 rounded-2xl border-5 border-transparent hover:border-[#b3855e] transition-all ease-in-out duration-300 hover:-translate-y-2">Clear Data</button>
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-                { loaded && <Shapeler color={shapeler.color} type={shapeler.type} male={shapeler.male} baby={shapeler.baby} pupil={shapeler.pupil} mouth={shapeler.mouth} eyebrow={shapeler.eyebrow} editing /> }
+                { loaded && <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center" ref={shapelerRef}><Shapeler color={shapeler.color} type={shapeler.type} male={shapeler.male} baby={shapeler.baby} pupil={shapeler.pupil} mouth={shapeler.mouth} eyebrow={shapeler.eyebrow} editing /></div> }
                 <button onClick={() => {if (shapelerIndex > 0) setShapelerIndex(shapelerIndex-1);}} className="relative w-12 right-5 -scale-x-100 cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-2">
                     <img src="/UI/arrow.png" className={`w-12 ${shapelerIndex <= 0 ? "hidden" : ""}`}/>
                 </button>
                 <input spellCheck="false" autoCorrect="off" autoCapitalize="none" autoComplete="off" className="relative bottom-65 text-6xl font-bold text-[#5b4636] border-b-4 text-center w-100 min-w-100 focus-visible:outline-none" placeholder={shapeler.baby ? shapeler.type.slice(0, -1) + "t" : shapeler.type} value={shapeler.name} onChange={(e) => setShapeler(s => ({...s, name:e.target.value}))}/>
                 <div className="absolute bottom-60 flex flex-row gap-3 bg-[#d7bd8d] px-3 py-2 rounded-2xl border-5 border-[#b3855e] text-[#5b4636] font-bold">
-                    <button onClick={() => {saveShapeler()}} className="ursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
+                    <button onClick={() => {saveShapeler()}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
                         <FontAwesomeIcon icon={faFloppyDisk} className="size-6"/>
                     </button>
                     <button onClick={() => randomizeShapeler()} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
@@ -186,7 +277,7 @@ export default function ShapelerEditor() {
                     <img src="/UI/arrow.png" className={`w-12 ${!savedShapelers || shapelerIndex >= savedShapelers.length ? "hidden" : ""}`}/>
                 </button>
             </div>
-            <div className="fixed -bottom-5 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24 border-5 border-[#b3855e]">
+            <div className="fixed bottom-0 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24 border-5 border-[#b3855e]">
                 <div className="flex flex-row gap-4">
                     <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${shapeler.male ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setShapeler(s => ({...s, male: true}))}>
                         <img src="/UI/maleSymbol.png" className="w-16"/>
@@ -277,28 +368,28 @@ export default function ShapelerEditor() {
                     <div className="flex flex-row gap-2 text-blue-500 font-bold">B<input type="range" className="bg-gray-300" min={0} max={255} step={1} value={parseInt(shapeler.color.slice(5, 7), 16)} onChange={(e) => { setShapeler(s => ({...s, color: setHexColorByChannel(shapeler.color, "b", Number(e.target.value))})) }}/></div>
                 </button>
                 <div className="flex flex-row gap-2 flex-wrap min-w-97">
-                    <button className={`h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Normal" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Normal", eyebrow: moodFeatures["Normal"].eyebrow, mouth: moodFeatures["Normal"].mouth, pupil: moodFeatures["Normal"].pupil }));}}>
+                    <button className={`h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Normal" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Normal", eyebrow: moodFeatures["Normal"].eyebrow, mouth: moodFeatures["Normal"].mouth, pupil: moodFeatures["Normal"].pupil }));}}>
                         Normal
                     </button>
-                    <button className={`h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Hungry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Hungry", eyebrow: moodFeatures["Hungry"].eyebrow, mouth: moodFeatures["Hungry"].mouth, pupil: moodFeatures["Hungry"].pupil }));}}>
+                    <button className={`h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Hungry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Hungry", eyebrow: moodFeatures["Hungry"].eyebrow, mouth: moodFeatures["Hungry"].mouth, pupil: moodFeatures["Hungry"].pupil }));}}>
                         Hungry
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Happy" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Happy", eyebrow: moodFeatures["Happy"].eyebrow, mouth: moodFeatures["Happy"].mouth, pupil: moodFeatures["Happy"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Happy" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Happy", eyebrow: moodFeatures["Happy"].eyebrow, mouth: moodFeatures["Happy"].mouth, pupil: moodFeatures["Happy"].pupil }));}}>
                         Happy
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Sad" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Sad", eyebrow: moodFeatures["Sad"].eyebrow, mouth: moodFeatures["Sad"].mouth, pupil: moodFeatures["Sad"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Sad" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Sad", eyebrow: moodFeatures["Sad"].eyebrow, mouth: moodFeatures["Sad"].mouth, pupil: moodFeatures["Sad"].pupil }));}}>
                         Sad
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Angry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Angry", eyebrow: moodFeatures["Angry"].eyebrow, mouth: moodFeatures["Angry"].mouth, pupil: moodFeatures["Angry"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Angry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Angry", eyebrow: moodFeatures["Angry"].eyebrow, mouth: moodFeatures["Angry"].mouth, pupil: moodFeatures["Angry"].pupil }));}}>
                         Angry
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Excited" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Excited", eyebrow: moodFeatures["Excited"].eyebrow, mouth: moodFeatures["Excited"].mouth, pupil: moodFeatures["Excited"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Excited" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Excited", eyebrow: moodFeatures["Excited"].eyebrow, mouth: moodFeatures["Excited"].mouth, pupil: moodFeatures["Excited"].pupil }));}}>
                         Excited
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Confused" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Confused", eyebrow: moodFeatures["Confused"].eyebrow, mouth: moodFeatures["Confused"].mouth, pupil: moodFeatures["Confused"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Confused" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Confused", eyebrow: moodFeatures["Confused"].eyebrow, mouth: moodFeatures["Confused"].mouth, pupil: moodFeatures["Confused"].pupil }));}}>
                         Confused
                     </button>
-                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Shocked" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Shocked", eyebrow: moodFeatures["Shocked"].eyebrow, mouth: moodFeatures["Shocked"].mouth, pupil: moodFeatures["Shocked"].pupil }));}}>
+                    <button className={`${shapeler.baby == true ? "hidden" : ""} h-11 px-2.5 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${shapeler.mood=="Shocked" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setShapeler(s => ({ ...s, mood: "Shocked", eyebrow: moodFeatures["Shocked"].eyebrow, mouth: moodFeatures["Shocked"].mouth, pupil: moodFeatures["Shocked"].pupil }));}}>
                         Shocked
                     </button>
                 </div>

@@ -22,7 +22,7 @@ export default function ShapelerEyebrows({ eyebrow="Normal", type, baby=false, e
     return(
         <div className="flex flex-row justify-center items-center space-between w-full h-full absolute">
                 <img className="relative" style={{bottom: selectedOffsets.brow.y, right: selectedOffsets.eyes.x}} src={baby ? `/Parts/Shapelet/Eyebrows/Shapelet-Eyebrow-Normal.png` : `/Parts/Shapeler/Eyebrows/Eyebrow-${eyebrow}.png` } />
-                <img className="relative -scale-x-100" style={{bottom: selectedOffsets.brow.y, left: selectedOffsets.eyes.x}} src={baby ? `/Parts/Shapelet/Eyebrows/Shapelet-Eyebrow-Normal.png` : `/Parts/Shapeler/Eyebrows/Eyebrow-${eyebrow}.png` } />
+                <img className="relative" style={{bottom: selectedOffsets.brow.y, left: selectedOffsets.eyes.x}} src={baby ? `/Parts/Shapelet/Eyebrows/Right/Shapelet-Eyebrow-Normal.png` : `/Parts/Shapeler/Eyebrows/Right/Eyebrow-${eyebrow}.png` } />
         </div>
     )
 }

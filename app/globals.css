@@ -23,3 +23,26 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b3855e;
+  border-radius: 100%;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(192, 141, 102);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #b3855e transparent;
+}
