@@ -13,66 +13,39 @@ export default function ShapelerEditor() {
     const [eyebrow, setEyebrow] = useState<"Normal" | "Confused" | "Excited" | "Excited-Surround" | "Mad" | "Scared-Under-Round" | "Worried">("Normal");
 
     return (
-        <div className = "flex flex-row gap-10 w-full h-full justify-start">
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -z-2">
+        <div className = "absolute top-0 left-0 w-full h-full min-h-180">
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center cursor-pointer">
                 <Shapeler color={color} type={type} male={male} baby={baby} pupil={pupil} mouth={mouth} eyebrow={eyebrow} editing />
+                <input className="relative bottom-65 text-6xl font-bold text-[#5b4636] border-b-4 text-center w-[20%]" placeholder="Name..."/>
             </div>
+            <div className="fixed bottom-0 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24">
+                <div className="flex flex-row gap-4">
+                    <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${male ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setMale(true)}>
+                        <img src="/UI/maleSymbol.png" className="w-16"/>
+                    </button>
+                    <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${!male ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setMale(false)}>
+                        <img src="/UI/femaleSymbol.png" className="h-16"/>
+                    </button>
+                </div>
 
-            <div className="flex flex-col gap-4">
-                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
-            </div>
+                <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${baby ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setBaby(!baby)}>
+                    <img src="/UI/babySymbol.png" className="h-16"/>
+                </button>
 
-            <div className="flex flex-col gap-4">
-                <select value={mouth} onChange={(e) => setMouth(e.target.value as any)}>
-                    <option value="Normal">Normal</option>
-                    <option value="Happy">Happy</option>
-                    <option value="Mad">Mad</option>
-                    <option value="Sad">Sad</option>
-                    <option value="Shocked">Shocked</option>
-                    <option value="Big-Wave">Big-Wave</option>
-                    <option value="Small-Wave">Small-Wave</option>
-                    <option value="Wide">Wide</option>
-                </select>
-            </div>
-            
-            <div className="flex flex-col gap-4">
-                <input type="checkbox" checked={!male} onChange={(e) => setMale(!e.target.checked)} />
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <input type="checkbox" checked={baby} onChange={(e) => setBaby(e.target.checked)} />
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <select value={pupil} onChange={(e) => setPupil(e.target.value as any)}>
-                    <option value="Normal">Normal</option>
-                    <option value="Blink">Blink</option>
-                    <option value="Crazy">Crazy</option>
-                    <option value="Dizzy">Dizzy</option>
-                    <option value="Excited">Excited</option>
-                    <option value="Small">Small</option>
-                </select>
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <select value={eyebrow} onChange={(e) => setEyebrow(e.target.value as any)}>
-                    <option value="Normal">Normal</option>
-                    <option value="Confused">Confused</option>
-                    <option value="Excited">Excited</option>
-                    <option value="Excited-Surround">Excited-Surround</option>
-                    <option value="Mad">Mad</option>
-                    <option value="Scared-Under-Round">Scared-Under-Round</option>
-                    <option value="Worried">Worried</option>
-                </select>
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <select value={type} onChange={(e) => setType(e.target.value as any)}>
-                    <option value="Bloopler">Bloopler</option>
-                    <option value="Googler">Googler</option>
-                    <option value="Sprickler">Sprickler</option>
-                    <option value="Stronkler">Stronkler</option>
-                </select>
+                <div className="flex flex-row gap-2 flex-wrap w-24">
+                    <button className={`size-11 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-3 transition-all ease-in-out duration-300 hover:-translate-y-1 ${type=="Googler" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setType("Googler")}>
+                        <img src="/Parts/Shapelet/Bodies/Body-Googlet.png" className="w-8"/>
+                    </button>
+                    <button className={`size-11 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-3 transition-all ease-in-out duration-300 hover:-translate-y-1 ${type=="Bloopler" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setType("Bloopler")}>
+                        <img src="/Parts/Shapelet/Bodies/Body-Blooplet.png" className="w-8"/>
+                    </button>
+                    <button className={`size-11 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-3 transition-all ease-in-out duration-300 hover:-translate-y-1 ${type=="Sprickler" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setType("Sprickler")}>
+                        <img src="/Parts/Shapelet/Bodies/Body-Spricklet.png" className="w-8"/>
+                    </button>
+                    <button className={`size-11 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-3 transition-all ease-in-out duration-300 hover:-translate-y-1 ${type=="Stronkler" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setType("Stronkler")}>
+                        <img src="/Parts/Shapelet/Bodies/Body-Stronklet.png" className="w-8"/>
+                    </button>
+                </div>
             </div>
 
         </div>
