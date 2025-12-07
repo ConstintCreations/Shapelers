@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-export default function ColorShapelerBody({ color, type, baby=false, editing=false }: { color: string, type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, editing?:boolean }) {
+export default function ColorShapelerBody({ color, type, baby=false, editing=false, canceled=false }: { color: string, type: "Bloopler" | "Googler" | "Sprickler" | "Stronkler", baby?:boolean, editing?:boolean, canceled?:boolean }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -12,9 +12,11 @@ export default function ColorShapelerBody({ color, type, baby=false, editing=fal
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
+        canceled = false;
         const bodyImage = new Image();
         bodyImage.src = bodyPath;
         bodyImage.onload = () => {
+            if (canceled) return;
             canvas.width = bodyImage.width;
             canvas.height = bodyImage.height;
 
@@ -24,7 +26,9 @@ export default function ColorShapelerBody({ color, type, baby=false, editing=fal
             ctx.drawImage(bodyImage, 0, 0);
             const outlineImage = new Image();
             outlineImage.src = outlinePath;
+
             outlineImage.onload = () => {
+                if (canceled) return;
                 ctx.globalCompositeOperation = "source-over";
                 ctx.drawImage(outlineImage, 0, 0);
             };
