@@ -7,6 +7,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import { faArrowRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { faDice } from "@fortawesome/free-solid-svg-icons";
+import { faImages } from "@fortawesome/free-solid-svg-icons";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 
 type PupilTypes = "Normal" | "Blink" | "Crazy" | "Dizzy" | "Excited" | "Small";
 type MouthTypes = "Normal" | "Happy" | "Mad" | "Sad" | "Shocked" | "Big-Wave" | "Small-Wave" | "Wide";
@@ -55,6 +59,8 @@ export default function ShapelerEditor() {
 
     const [savedShapelers, setSavedShapelers] = useState<ShapelerType[] | null>(null);
     const [shapelerIndex, setShapelerIndex] = useState(0);
+    const [showGallery, setShowGallery] = useState(false);
+    const [showPhotoCountdown, setShowPhotoCountdown] = useState(false);
 
     function setHexColorByChannel(hex: string, channel: "r" | "g" | "b", value: number) {
         const hexValue = value.toString(16).padStart(2, '0');
@@ -131,6 +137,33 @@ export default function ShapelerEditor() {
 
     return (
         <div className = "absolute top-0 left-0 w-full h-full min-h-220">
+            <img src="/UI/ShapelerMaker.png" className="h-30 absolute top-5 left-5" />
+            <div className="fixed right-5 top-5 flex flex-row gap-8 bg-[#d7bd8d] px-5 py-4 rounded-2xl border-5 border-[#b3855e] text-[#5b4636] font-bold z-20">
+                <button onClick={() => {if (!showPhotoCountdown) setShowGallery(!showGallery)}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
+                    <FontAwesomeIcon icon={faImages} className="scale-200 text-[#5b4636]"/>
+                </button>
+                <button onClick={() => {setShowGallery(false); setShowPhotoCountdown(!showPhotoCountdown)}} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
+                    <FontAwesomeIcon icon={faCamera} className="scale-200 text-[#5b4636]"/>
+                </button>
+            </div>
+            
+            { showGallery &&
+            <div className="absolute flex w-full h-full items-center justify-center z-15">
+                <FontAwesomeIcon icon={faClose} onClick={() => setShowGallery(false)} className="scale-200 absolute top-11/64 right-5/32 text-[#5b4636] z-30 cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none"/>
+                <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50" />
+                <div className="w-3/4 h-3/4 min-w-100 min-h-100 bg-[#d7bd8d] rounded-2xl border-10 border-[#b3855e] text-[#5b4636] rounded-3xl p-5 z-10 overflow-auto flex flex-row flex-wrap gap-5 justify-center items-center text-center">
+                    Nothing to see here... <br /> Try taking some pictures!
+                </div>
+            </div>
+            }
+
+            { showPhotoCountdown &&
+            <div className="absolute flex w-full h-full items-center justify-center z-15">
+                <div className="fixed top-0 left-0 w-full h-full bg-black opacity-20" />
+                <div className="text-white text-9xl opacity-50 scale-200"></div>
+            </div>
+            }
+            
             <button onClick={() => {localStorage.clear(); location.reload()}} className="fixed z-10 bottom-2 right-5 text-[#5b4636] font-bold cursor-pointer hover:bg-[#d7bd8d] px-3 py-1 rounded-2xl border-5 border-transparent hover:border-[#b3855e] transition-all ease-in-out duration-300 hover:-translate-y-2">Clear Data</button>
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
                 { loaded && <Shapeler color={shapeler.color} type={shapeler.type} male={shapeler.male} baby={shapeler.baby} pupil={shapeler.pupil} mouth={shapeler.mouth} eyebrow={shapeler.eyebrow} editing /> }
@@ -139,7 +172,7 @@ export default function ShapelerEditor() {
                 </button>
                 <input spellCheck="false" autoCorrect="off" autoCapitalize="none" autoComplete="off" className="relative bottom-65 text-6xl font-bold text-[#5b4636] border-b-4 text-center w-100 min-w-100 focus-visible:outline-none" placeholder={shapeler.baby ? shapeler.type.slice(0, -1) + "t" : shapeler.type} value={shapeler.name} onChange={(e) => setShapeler(s => ({...s, name:e.target.value}))}/>
                 <div className="absolute bottom-60 flex flex-row gap-3 bg-[#d7bd8d] px-3 py-2 rounded-2xl border-5 border-[#b3855e] text-[#5b4636] font-bold">
-                    <button onClick={() => {saveShapeler()}} className="bg-[#d7bd8d] cursor-pointer  transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
+                    <button onClick={() => {saveShapeler()}} className="ursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
                         <FontAwesomeIcon icon={faFloppyDisk} className="size-6"/>
                     </button>
                     <button onClick={() => randomizeShapeler()} className="cursor-pointer transition-transform ease-in-out duration-300 hover:-translate-y-1 focus-visible:outline-none">
@@ -153,7 +186,7 @@ export default function ShapelerEditor() {
                     <img src="/UI/arrow.png" className={`w-12 ${!savedShapelers || shapelerIndex >= savedShapelers.length ? "hidden" : ""}`}/>
                 </button>
             </div>
-            <div className="fixed bottom-0 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24">
+            <div className="fixed -bottom-5 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24 border-5 border-[#b3855e]">
                 <div className="flex flex-row gap-4">
                     <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${shapeler.male ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setShapeler(s => ({...s, male: true}))}>
                         <img src="/UI/maleSymbol.png" className="w-16"/>
