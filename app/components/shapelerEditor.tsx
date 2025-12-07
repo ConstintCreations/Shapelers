@@ -12,6 +12,7 @@ export default function ShapelerEditor() {
     const [pupil, setPupil] = useState<"Normal" | "Blink" | "Crazy" | "Dizzy" | "Excited" | "Small">("Normal");
     const [mouth, setMouth] = useState<"Normal" | "Happy" | "Mad" | "Sad" | "Shocked" | "Big-Wave" | "Small-Wave" | "Wide">("Normal");
     const [eyebrow, setEyebrow] = useState<"Normal" | "Confused" | "Excited" | "Excited-Surround" | "Mad" | "Scared-Under-Round" | "Worried">("Normal");
+    const [mood, setMood] = useState<"Normal" | "Hungry" | "Happy" | "Sad" | "Angry" | "Excited" | "Confused" | "Shocked">("Normal");
 
     function setHexColorByChannel(hex: string, channel: "r" | "g" | "b", value: number) {
         const hexValue = value.toString(16).padStart(2, '0');
@@ -117,6 +118,33 @@ export default function ShapelerEditor() {
                     <div className="flex flex-row gap-2 text-green-500 font-bold">G<input type="range" className="bg-gray-300" min={0} max={255} step={1} value={parseInt(color.slice(3, 5), 16)} onChange={(e) => { setColor(setHexColorByChannel(color, "g", Number(e.target.value))) }}/></div>
                     <div className="flex flex-row gap-2 text-blue-500 font-bold">B<input type="range" className="bg-gray-300" min={0} max={255} step={1} value={parseInt(color.slice(5, 7), 16)} onChange={(e) => { setColor(setHexColorByChannel(color, "b", Number(e.target.value))) }}/></div>
                 </button>
+                <div className="flex flex-row gap-2 flex-wrap min-w-97">
+                    <button className={`h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Normal" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Normal"); setEyebrow("Normal"); setMouth("Normal"); setPupil("Normal");}}>
+                        Normal
+                    </button>
+                    <button className={`h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Hungry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Hungry"); setEyebrow("Normal"); setMouth("Wide"); setPupil("Normal");}}>
+                        Hungry
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Happy" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Happy"); setEyebrow("Normal"); setMouth("Happy"); setPupil("Normal");}}>
+                        Happy
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Sad" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Sad"); setEyebrow("Worried"); setMouth("Sad"); setPupil("Crazy");}}>
+                        Sad
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Angry" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Angry"); setEyebrow("Mad"); setMouth("Mad"); setPupil("Normal");}}>
+                        Angry
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Excited" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Excited"); setEyebrow("Excited"); setMouth("Shocked"); setPupil("Excited");}}>
+                        Excited
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Confused" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Confused"); setEyebrow("Confused"); setMouth("Small-Wave"); setPupil("Dizzy");}}>
+                        Confused
+                    </button>
+                    <button className={`${baby == true ? "hidden" : ""} h-11 px-3 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 text-[#5b4636] transition-all ease-in-out duration-300 hover:-translate-y-1 ${mood=="Shocked" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => {setMood("Shocked"); setEyebrow("Normal"); setMouth("Shocked"); setPupil("Normal");}}>
+                        Shocked
+                    </button>
+                </div>
+                
             </div>
 
         </div>
