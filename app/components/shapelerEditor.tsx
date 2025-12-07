@@ -25,7 +25,7 @@ export default function ShapelerEditor() {
         <div className = "absolute top-0 left-0 w-full h-full min-h-180">
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center cursor-pointer">
                 <Shapeler color={color} type={type} male={male} baby={baby} pupil={pupil} mouth={mouth} eyebrow={eyebrow} editing />
-                <input className="relative bottom-65 text-6xl font-bold text-[#5b4636] border-b-4 text-center w-[20%] focus-visible:outline-none" placeholder="Name..."/>
+                <input className="relative bottom-65 text-6xl font-bold text-[#5b4636] border-b-4 text-center w-100 min-w-100 focus-visible:outline-none" placeholder="Name..."/>
             </div>
             <div className="fixed bottom-0 w-full flex flex-row gap-8 bg-[#efdbb7] rounded-t-4xl items-center p-10 overflow-auto min-h-24">
                 <div className="flex flex-row gap-4">
@@ -37,11 +37,11 @@ export default function ShapelerEditor() {
                     </button>
                 </div>
 
-                <button className={`size-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${baby ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setBaby(!baby)}>
-                    <img src="/UI/babySymbol.png" className="h-16"/>
+                <button className={`size-24 min-w-24 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-5 transition-all ease-in-out duration-300 hover:-translate-y-2 ${baby ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setBaby(!baby)}>
+                    <img src="/UI/babySymbol.png" className="w-14"/>
                 </button>
 
-                <div className="flex flex-row gap-2 flex-wrap w-24">
+                <div className="flex flex-row gap-2 flex-wrap w-24 min-w-24">
                     <button className={`size-11 cursor-pointer rounded-2xl bg-[#d7bd8d] flex items-center justify-center border-3 transition-all ease-in-out duration-300 hover:-translate-y-1 ${type=="Googler" ? "border-[#cfa37d]" : "border-[#b3855e]"}`} onClick={() => setType("Googler")}>
                         <img src="/Parts/Shapelet/Bodies/Body-Googlet.png" className="w-8"/>
                     </button>
@@ -55,7 +55,8 @@ export default function ShapelerEditor() {
                         <img src="/Parts/Shapelet/Bodies/Body-Stronklet.png" className="w-8"/>
                     </button>
                 </div>
-                <div className="flex flex-row gap-2 flex-wrap max-w-115">
+
+                <div className="flex flex-row gap-2 flex-wrap w-115 min-w-115">
                     <button className={`size-11 cursor-pointer rounded-2xl flex items-center justify-center transition-transform ease-in-out duration-300 hover:-translate-y-1`} onClick={() => setColor("#bdbdbdff")}>
                         <ColorSwatch color="#bdbdbdff"/>
                     </button>
